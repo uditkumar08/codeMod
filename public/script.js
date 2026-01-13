@@ -1,21 +1,36 @@
-let hidden = "";
+let hiddenResult = "";
 
 async function send() {
-  const text = document.getElementById("input").value.trim();
-  if (!text) return;
+  const input = document.getElementById("input").value.trim();
+  if (!input) return;
 
-  const res = await fetch("/api/ask", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ prompt: text })
-  });
+  hiddenResult = ""; // reset
 
-  const data = await res.json();
-  hidden = data.result;
+  try {
+    const res = await fetch("/api/ask", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ prompt: input })
+    });
+
+    const data = await res.json();
+
+    if (data.result) {
+      hiddenResult = data.result;
+    } else {
+      alert(data.error || "Server error");
+    }
+
+  } catch (e) {
+    alert("Network / Server failure");
+  }
 }
 
 function copy() {
-  if (!hidden) return alert("Nothing to copy");
-  navigator.clipboard.writeText(hidden);
+  if (!hiddenResult) {
+    alert("Nothing to copy");
+    return;
+  }
+  navigator.clipboard.writeText(hiddenResult);
   alert("Copied!");
 }
