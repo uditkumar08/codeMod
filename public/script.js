@@ -1,37 +1,21 @@
-let hiddenResult = ""; // 🔒 stores AI response secretly
+let hidden = "";
 
 async function send() {
-  const inputEl = document.getElementById("input");
-  const text = inputEl.value.trim();
+  const text = document.getElementById("input").value.trim();
+  if (!text) return;
 
-  if (!text) return alert("Enter something");
+  const res = await fetch("/api/ask", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ prompt: text })
+  });
 
-  try {
-    const res = await fetch("/ask", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ prompt: text }),
-    });
-
-    const data = await res.json();
-
-    // ✅ Store result but DO NOT show
-    hiddenResult = data.result;
-
-    inputEl.value = "";
-    console.log("Response received (hidden)");
-
-  } catch (err) {
-    console.error("Submit failed", err);
-  }
+  const data = await res.json();
+  hidden = data.result;
 }
 
 function copy() {
-  if (!hiddenResult) {
-    alert("Nothing to copy. Submit first.");
-    return;
-  }
-
-  navigator.clipboard.writeText(hiddenResult);
-  
+  if (!hidden) return alert("Nothing to copy");
+  navigator.clipboard.writeText(hidden);
+  alert("Copied!");
 }
